@@ -29,8 +29,14 @@ def create_pdf(messages):
     pdf.add_page()
     pdf.set_font("Arial", size=11)
     pdf.cell(200, 10, txt="Session de Revision - Titre Pro CTCR & FIMO", ln=True, align='C')
-    pdf.ln(10)
+    pdf.ln(5)
     
+    # Ajout de la mention de prévention dans le PDF
+    pdf.set_font("Arial", 'I', size=9)
+    pdf.multi_cell(0, 6, txt="Avertissement : Cet outil utilise l'intelligence artificielle. Il appartient a l'utilisateur de verifier systematiquement l'exactitude des informations fournies avec le referentiel officiel AFTRAL.")
+    pdf.ln(5)
+    
+    pdf.set_font("Arial", size=11)
     for msg in messages:
         if msg["role"] == "system": continue
         role = "Eleve" if msg["role"] == "user" else "Formateur IA"
@@ -47,6 +53,9 @@ if check_password():
     st.title("🚌 Formateur IA - Permis D & FIMO")
     st.markdown("**Titre Pro CTCR Voyageurs - Référentiel AFTRAL 2026**")
     
+    # Mention importante affichée sur l'interface
+    st.warning("⚠️ **Important :** Cet outil est un assistant basé sur l'IA. Il vous appartient de vérifier systématiquement les réponses fournies avec vos cours et le référentiel officiel AFTRAL.")
+    
     try:
         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
     except Exception as e:
@@ -62,36 +71,29 @@ Ton rôle est d'interroger l'élève sur :
 Pédagogie : Pose une question claire, attends la réponse, puis valide ou corrige avec bienveillance. Ne donne pas de longues listes indigestes. Concentre-toi sur la sécurité et les mots-clés essentiels. Les utilisateurs révisent sur leur smartphone, sois concis."""
         st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    # --- NOUVELLE GESTION DU CHAMP DE SAISIE (Callbacks) ---
     def envoyer_message():
         texte = st.session_state.champ_saisie
-        # Si le texte n'est pas vide
         if texte.strip() != "":
-            # 1. On sauvegarde la question de l'élève
             st.session_state.messages.append({"role": "user", "content": texte})
-            # 2. On vide instantanément le champ de saisie
             st.session_state.champ_saisie = ""
-            # 3. On active un signal pour appeler l'IA
             st.session_state.requete_en_attente = True
 
     st.markdown("---")
     
-    # Interface avec le champ de texte et le bouton alignés
     col1, col2 = st.columns([4, 1])
     with col1:
         st.text_input("Poser une question :", key="champ_saisie", label_visibility="collapsed", placeholder="Pose ta question ou demande un thème...", on_change=envoyer_message)
     with col2:
         st.button("Envoyer", on_click=envoyer_message, use_container_width=True)
 
-    # --- APPEL A L'IA ---
     if st.session_state.get("requete_en_attente", False):
         with st.spinner("Le formateur rédige sa réponse..."):
             try:
-                # Nettoyage strict des messages pour l'API Groq
                 api_messages = [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
                 
+                # Utilisation du modèle Llama 3.1 actuellement supporté et stable par Groq
                 response = client.chat.completions.create(
-                    model="llama3-70b-8192",
+                    model="llama-3.1-70b-versatile",
                     messages=api_messages
                 )
                 reply = response.choices[0].message.content
@@ -99,19 +101,15 @@ Pédagogie : Pose une question claire, attends la réponse, puis valide ou corri
             except Exception as e:
                 st.error(f"Erreur de communication avec l'API Groq : {e}")
         
-        # On remet le signal à zéro pour attendre la prochaine question
         st.session_state.requete_en_attente = False
 
-    # --- AFFICHAGE DE L'HISTORIQUE ---
     st.markdown("### Historique de la session")
     messages_utiles = [m for m in st.session_state.messages if m["role"] != "system"]
     
-    # Inversé : du plus récent au plus ancien
     for msg in reversed(messages_utiles):
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    # --- BOUTON EXPORT PDF ---
     st.markdown("---")
     if len(st.session_state.messages) > 1:
         pdf_path = create_pdf(st.session_state.messages)

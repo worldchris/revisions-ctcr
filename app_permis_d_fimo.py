@@ -1,5 +1,5 @@
 import streamlit as st
-from groq import Groq
+from huggingface_hub import InferenceClient
 import datetime
 from fpdf import FPDF
 import tempfile
@@ -31,7 +31,6 @@ def create_pdf(messages):
     pdf.cell(200, 10, txt="Session de Revision - Titre Pro CTCR & FIMO", ln=True, align='C')
     pdf.ln(5)
     
-    # Ajout de la mention de prévention dans le PDF
     pdf.set_font("Arial", 'I', size=9)
     pdf.multi_cell(0, 6, txt="Avertissement : Cet outil utilise l'intelligence artificielle. Il appartient a l'utilisateur de verifier systematiquement l'exactitude des informations fournies avec le referentiel officiel AFTRAL.")
     pdf.ln(5)
@@ -53,13 +52,13 @@ if check_password():
     st.title("🚌 Formateur IA - Permis D & FIMO")
     st.markdown("**Titre Pro CTCR Voyageurs - Référentiel AFTRAL 2026**")
     
-    # Mention importante affichée sur l'interface
     st.warning("⚠️ **Important :** Cet outil est un assistant basé sur l'IA. Il vous appartient de vérifier systématiquement les réponses fournies avec vos cours et le référentiel officiel AFTRAL.")
     
     try:
-        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+        # Connexion à l'API Hugging Face
+        client = InferenceClient(api_key=st.secrets["HF_TOKEN"])
     except Exception as e:
-        st.error("Clé API introuvable. Vérifiez les secrets de Streamlit.")
+        st.error("Clé API Hugging Face introuvable dans les secrets Streamlit.")
         st.stop()
         
     if "messages" not in st.session_state:
@@ -89,17 +88,19 @@ Pédagogie : Pose une question claire, attends la réponse, puis valide ou corri
     if st.session_state.get("requete_en_attente", False):
         with st.spinner("Le formateur rédige sa réponse..."):
             try:
+                # Formatage des messages pour Hugging Face
                 api_messages = [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
                 
-                # Modèle Llama 3 8B, fonctionnel et stable sur le plan gratuit de Groq
-                response = client.chat.completions.create(
-                    model="llama3-8b-8192",
-                    messages=api_messages
+                # Appel au modèle Mistral 7B via Hugging Face Serverless API
+                response = client.chat_completion(
+                    model="mistralai/Mistral-7B-Instruct-v0.3",
+                    messages=api_messages,
+                    max_tokens=800
                 )
                 reply = response.choices[0].message.content
                 st.session_state.messages.append({"role": "assistant", "content": reply})
             except Exception as e:
-                st.error(f"Erreur de communication avec l'API Groq : {e}")
+                st.error(f"Erreur de communication avec l'API Hugging Face : {e}")
         
         st.session_state.requete_en_attente = False
 

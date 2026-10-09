@@ -93,7 +93,7 @@ Pédagogie : Pose une question claire, attends la réponse, puis valide ou corri
                 
                 # Utilisation du modèle Llama 3.1 actuellement supporté et stable par Groq
                 response = client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
+                    model="llama3-8b-8192",",
                     messages=api_messages
                 )
                 reply = response.choices[0].message.content

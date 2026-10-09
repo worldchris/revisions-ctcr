@@ -94,7 +94,13 @@ if check_password():
     st.title("🚌 Centre Complet de Révision - Permis D & FIMO")
     st.markdown("**Titre Pro CTCR Voyageurs - Référentiel AFTRAL 2026**")
     
-    onglet = st.tabs(["📚 Cours & Fiches Officielles", "🧠 Entraînement & QCM", "📋 Fiches Orales Détaillées"])
+    # Navigation par onglets étendue
+    onglet = st.tabs([
+        "📚 Cours & Fiches", 
+        "🧠 Entraînement QCM", 
+        "📋 6 Thèmes & 12 Fiches Orales", 
+        "📺 Tutos & Vidéos YouTube"
+    ])
 
     # --- ONGLET 1 : COURS & FICHES OFFICIELLES ---
     with onglet[0]:
@@ -201,20 +207,60 @@ if check_password():
                 st.session_state.question_index = (st.session_state.question_index + 1) % len(BANQUE_QUESTIONS)
                 st.rerun()
 
-    # --- ONGLET 3 : FICHES ORALES DÉTAILLÉES ---
+    # --- ONGLET 3 : 6 THÈMES & 12 FICHES ORALES ---
     with onglet[2]:
-        st.header("📋 Les 6 Fiches Orales Officielles de l'Autocar")
-        st.markdown("Chaque fiche doit être présentée clairement lors de l'épreuve orale avec un argumentaire structuré.")
+        st.header("📋 Référentiel : 6 Thèmes & 12 Fiches Orales")
+        st.markdown("Structure officielle de l'épreuve du Titre Pro CTCR.")
 
-        fiches_orales = {
-            "Fiche 1 : Contrôles de sécurité avant départ": "Vérification exhaustive du véhicule : documents de bord réglementaires (copie conforme de la licence communautaire, cartes et bon fonctionnement du chronotachygraphe numérique/intelligent, conformité de l'assurance via le fichier officiel), état extérieur, propreté, fonctionnement des feux et des dispositifs de signalisation.",
-            "Fiche 2 : Installation au poste de conduite & Visibilité": "Réglage ergonomique du siège (suspension, distance), réglage des rétroviseurs grand angle et de proximités pour éliminer les angles morts, prise en main des commandes de bord.",
-            "Fiche 3 : Masses, dimensions et chargement": "Respect du P.T.A.C., répartition des bagages en soute (poids lourd en bas, répartition équilibrée gauche/droite), hauteur et largeur de l'autocar face aux infrastructures (ponts, tunnels, gabarits étroits).",
-            "Fiche 4 : Sécurité des passagers et situations d'urgence": "Information des voyageurs, port de la ceinture, maîtrise de l'ouverture d'urgence des portes et des issues de secours, évacuation rapide en cas d'incendie ou d'accident.",
-            "Fiche 5 : Éco-conduite et mécanique du véhicule": "Anticipation de la circulation, utilisation optimale des plages de régime moteur (couple), utilisation du ralentisseur (hydraulique ou électromagnétique) pour préserver les freins de service.",
-            "Fiche 6 : Réglementation du transport et gestion des incidents": "Application stricte de la RSE, respect des temps de pause, gestion des aléas sur la route (retards, pannes, comportements indésirables de passagers) et procédures d'urgence."
+        st.subheader("Les 6 Thèmes Majeurs")
+        st.markdown("""
+        1. **Réglementation du transport routier de voyageurs** (RSE, documents, contrats).
+        2. **Sécurité et sûreté** (contrôles, prévention des risques, gestion des conflits/terrorisme).
+        3. **Technique et mécanique du véhicule** (organes, fonctionnement, sécurité active/passive).
+        4. **Environnement et éco-conduite** (maîtrise de l'énergie, cinématique du car).
+        5. **Accueil, commercial et relation client** (qualité de service, prise en charge PMR).
+        6. **Gestion des situations d'urgence et des aléas** (accidents, pannes, incidents de parcours).
+        """)
+
+        st.markdown("---")
+        st.subheader("Les 12 Fiches Orales Officielles")
+        
+        fiches_orales_12 = {
+            "Fiche 1 : Documents de bord et conformité réglementaire": "Vérification de la licence communautaire, cartes tachygraphes, vérification de l'assurance via le fichier FVA et carnets de route.",
+            "Fiche 2 : Contrôles extérieurs de sécurité (Socle 1)": "État de la carrosserie, des optiques, des rétroviseurs, absence de chocs et propreté des surfaces vitrées.",
+            "Fiche 3 : Pneumatiques et liaisons au sol": "Contrôle de l'usure de la bande de roulement, pression, hernies, coupures et présence de corps étrangers.",
+            "Fiche 4 : Installation au poste de conduite et ergonomie": "Réglage du siège, du volant, des ceintures et élimination des angles morts par le positionnement des rétroviseurs.",
+            "Fiche 5 : Commandes de bord et équipements de sécurité": "Vérification des voyants, avertisseurs sonores, trousse de secours, extincteurs et marteaux brise-vitres.",
+            "Fiche 6 : Système de freinage et circuits pneumatiques": "Contrôle des purges de réservoirs d'air, test du frein de service, du ralentisseur et du frein de parc.",
+            "Fiche 7 : Masses, dimensions et répartition du chargement": "Respect du PTAC, chargement et arrimage des bagages en soute, équilibrage des charges (gauche/droite).",
+            "Fiche 8 : Sécurité des passagers et montée/descente": "Contrôle des portes, sécurisation de l'embarquement, zones de circulation à bord et port de la ceinture.",
+            "Fiche 9 : Accessibilité et équipements PMR": "Mise en œuvre de la rampe d'accès UFR (Fauteuil Roulant), dispositifs de fixation et consignes d'embarquement spécifique.",
+            "Fiche 10 : Éco-conduite et maîtrise de la cinématique": "Anticipation des trajectoires, gestion du porte-à-faux arrière et utilisation des plages de couple moteur.",
+            "Fiche 11 : Conduite en conditions difficiles": "Adaptation de la vitesse par temps de pluie, brouillard, neige, verglas ou en circulation dense (intersections).",
+            "Fiche 12 : Situations d'urgence, évacuation et incendie": "Procédures d'évacuation rapide des passagers, utilisation des issues de secours et conduites à tenir en cas de sinistre."
         }
 
-        for titre_fo, desc_fo in fiches_orales.items():
+        for titre_fo, desc_fo in fiches_orales_12.items():
             with st.expander(titre_fo):
                 st.write(desc_fo)
+
+    # --- ONGLET 4 : TUTOS & VIDÉOS YOUTUBE ---
+    with onglet[3]:
+        st.header("📺 Tutoriels & Vidéos YouTube Recommandés")
+        st.markdown("Ressources visuelles indispensables pour réviser les gestes techniques, les fiches orales et la conduite en autocar.")
+
+        st.markdown("""
+        Pour compléter vos révisions avec des démonstrations en conditions réelles, voici les recherches ciblées et chaînes à suivre sur YouTube :
+
+        * **🔍 Pour réviser les Fiches Orales et les Contrôles (Socle 1 & 2) :**
+          * Tapez sur YouTube : `Fiches orales transport en commun autocar` ou `Contrôle avant départ car AFTRAL`.
+          * Vous y trouverez des vidéos de formateurs présentant pas à pas le tour du véhicule et la méthode pour réussir l'oral.
+
+        * **🔍 Pour la Maîtrise du Chronotachygraphe et de la RSE :**
+          * Tapez sur YouTube : `Utilisation chronotachygraphe numerique conducteur autocar` ou `Temps de conduite et de repos FIMO FT`.
+
+        * **🔍 Pour la Conduite et la Manoeuvrabilité (Porte-à-faux, angles morts) :**
+          * Tapez sur YouTube : `Conduite autocar gabarit maniabilité` pour observer les trajectoires en circulation et en virage serré.
+
+        * **💡 Conseil du groupe :** Regarder ces vidéos le soir sur smartphone permet d'ancrer visuellement les procédures avant de les pratiquer en centre de formation.
+        """)

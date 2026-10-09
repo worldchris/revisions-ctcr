@@ -91,9 +91,9 @@ Pédagogie : Pose une question claire, attends la réponse, puis valide ou corri
             try:
                 api_messages = [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
                 
-                # Utilisation du modèle Llama 3.1 actuellement supporté et stable par Groq
+                # Modèle Llama 3 8B, fonctionnel et stable sur le plan gratuit de Groq
                 response = client.chat.completions.create(
-                    model="llama3-8b-8192",",
+                    model="llama3-8b-8192",
                     messages=api_messages
                 )
                 reply = response.choices[0].message.content

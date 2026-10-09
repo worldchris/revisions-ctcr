@@ -6,8 +6,6 @@ import tempfile
 
 # --- CONFIGURATION ---
 MOT_DE_PASSE = "Crossway2026"
-# Remplace par ta vraie clé API Groq
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 
 # --- PAGE CONFIGURATION (Mobile Friendly) ---
 st.set_page_config(
@@ -62,9 +60,11 @@ if check_password():
     st.markdown("**Titre Pro CTCR Voyageurs - Référentiel AFTRAL 2026**")
     
     try:
-        client = Groq(api_key=GROQ_API_KEY)
+        # Récupération sécurisée de la clé depuis le coffre-fort Streamlit
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
     except Exception as e:
-        st.error("Veuillez configurer la clé API Groq dans le script.")
+        st.error("Clé API introuvable. Vérifiez les secrets de Streamlit.")
+        st.stop()
     
     SYSTEM_PROMPT = """Tu es un formateur expert pour le Titre Pro Conducteur de Transport en Commun sur Route (CTCR), le Permis D et la FIMO Voyageurs, basé sur le référentiel AFTRAL 2026.
 Ton rôle est d'interroger l'élève sur :
@@ -76,30 +76,42 @@ Pédagogie : Pose une question claire, attends la réponse, puis valide ou corri
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    for msg in st.session_state.messages:
-        if msg["role"] != "system":
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+    # --- ZONE DE SAISIE EN HAUT (Idéal pour smartphone) ---
+    st.markdown("---")
+    with st.form("chat_form", clear_on_submit=True):
+        user_input = st.text_input("Pose ta question ou demande à être interrogé :", placeholder="Ex: Pose-moi une question sur le thème 3...")
+        submit_button = st.form_submit_button("Envoyer au formateur 🚀")
 
-    if prompt := st.chat_input("Ex: Pose-moi une question sur les temps de conduite FIMO..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
-
-        with st.chat_message("assistant"):
-            message_placeholder = st.empty()
+    if submit_button and user_input:
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        
+        with st.spinner("Le formateur réfléchit..."):
             try:
-                # Appel API Groq avec le modèle Mixtral
+                # Nouveau modèle Llama 3 actif et fonctionnel
                 response = client.chat.completions.create(
-                    model="mixtral-8x7b-32768",
+                    model="llama-3.3-70b-versatile",
                     messages=st.session_state.messages
                 )
                 reponse_texte = response.choices[0].message.content
-                message_placeholder.markdown(reponse_texte)
                 st.session_state.messages.append({"role": "assistant", "content": reponse_texte})
             except Exception as e:
                 st.error(f"Erreur de communication avec l'API Groq: {e}")
+        
+        # Recharge l'interface pour afficher la réponse immédiatement
+        st.rerun()
 
+    # --- AFFICHAGE DE L'HISTORIQUE (Du plus récent au plus ancien) ---
+    st.markdown("### Historique de la session")
+    
+    # On filtre pour ne pas afficher les instructions secrètes (system prompt)
+    messages_a_afficher = [msg for msg in st.session_state.messages if msg["role"] != "system"]
+    
+    # On inverse la liste pour avoir le message le plus récent juste sous le formulaire d'envoi
+    for msg in reversed(messages_a_afficher):
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    # Bouton d'export PDF toujours accessible en bas
     st.markdown("---")
     if len(st.session_state.messages) > 1:
         pdf_path = create_pdf(st.session_state.messages)
